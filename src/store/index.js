@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { auth, db } from '../firebase'
+import { auth } from '../firebase'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { ref } from 'firebase/database'
 
 Vue.use(Vuex)
 
@@ -88,7 +89,7 @@ export const store = new Vuex.Store({
     registerUserForMeetup ({commit, getters}, payload) {
       commit('setLoading', true)
       const user = getters.user
-      db.ref('/users/' + user.id).child('/registrations/')
+      ref('/users/' + user.id).child('/registrations/')
         .push(payload)
         .then(data => {
           commit('setLoading', false)
@@ -106,7 +107,7 @@ export const store = new Vuex.Store({
         return
       }
       const fbKey = user.fbKeys[payload]
-      db.ref('/users/' + user.id + '/registrations/').child(fbKey)
+      ref('/users/' + user.id + '/registrations/').child(fbKey)
         .remove()
         .then(() => {
           commit('setLoading', false)
@@ -119,7 +120,7 @@ export const store = new Vuex.Store({
     },
     loadMeetups ({commit}) {
       commit('setLoading', true)
-      db.ref('meetups').once('value')
+      ref('meetups').once('value')
         .then((data) => {
           const meetups = []
           const obj = data.val()
@@ -154,7 +155,7 @@ export const store = new Vuex.Store({
       }
       let imageUrl
       let key
-      db.ref('meetups').push(meetup)
+      ref('meetups').push(meetup)
         .then((data) => {
           key = data.key
           return key
@@ -162,11 +163,11 @@ export const store = new Vuex.Store({
         .then(key => {
           const filename = payload.image.name
           const ext = filename.slice(filename.lastIndexOf('.'))
-          return auth.storage().ref('meetups/' + key + '.' + ext).put(payload.image)
+          return ref('meetups/' + key + '.' + ext).put(payload.image)
         })
         .then(fileData => {
           imageUrl = fileData.metadata.downloadURLs[0]
-          return db.ref('meetups').child(key).update({imageUrl: imageUrl})
+          return ref('meetups').child(key).update({imageUrl: imageUrl})
         })
         .then(() => {
           commit('createMeetup', {
@@ -192,7 +193,7 @@ export const store = new Vuex.Store({
       if (payload.date) {
         updateObj.date = payload.date
       }
-      db.ref('meetups').child(payload.id).update(updateObj)
+      ref('meetups').child(payload.id).update(updateObj)
         .then(() => {
           commit('setLoading', false)
           commit('updateMeetup', payload)
@@ -257,7 +258,7 @@ export const store = new Vuex.Store({
     },
     fetchUserData ({commit, getters}) {
       commit('setLoading', true)
-      db.ref('/users/' + getters.user.id + '/registrations/').once('value')
+      ref('/users/' + getters.user.id + '/registrations/').once('value')
         .then(data => {
           const dataPairs = data.val()
           let registeredMeetups = []
