@@ -13,7 +13,7 @@
         <v-divider></v-divider>
         <v-layout row wrap>
           <v-flex xs12>
-            <v-card-text>Please check your email for more details. You can always change your decision later on.</v-card-text>
+            <v-card-text>Please check your email- himabindu1149@gmail.com for more details. You can always change your decision later on.</v-card-text>
           </v-flex>
         </v-layout>
         <v-layout row wrap>
